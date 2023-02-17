@@ -1,0 +1,12 @@
+{
+    "version": 6,
+    "configurePresets": [
+        {
+            "name": "Makefile",
+            "displayName": "Makefile",
+            "description": "Default build using makefile",
+            "binaryDir": "build",
+            "generator": "Unix Makefile"
+        }
+    ]
+}
