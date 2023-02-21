@@ -30,7 +30,7 @@
 *******************************************************************************/
 typedef struct
 {
-	osMemoryPoolId_t* Handle;
+	uint8_t * Handle;
 	int16_t Capacity;
 	int16_t Blocksize;
 }MPool_t;

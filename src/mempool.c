@@ -1,4 +1,5 @@
 #include "mempool.h"
+#include "freertos/FreeRTOS.h"
 #ifdef MEMPOOL_H_
 
 /******************************************************************************
@@ -36,12 +37,12 @@ MPool_t* Mempool_P = MemPool;
 *******************************************************************************/
 bool Mempool_Init(void){
 	/* Create memory pool */
-	for(uint8_t idx=0; idx< (sizeof(MemPool)/sizeof(MemPool[0])); idx++)
-	{
-		osMemoryPoolId_t status = osMemoryPoolNew(MemPool[idx].Capacity, MemPool[idx].Blocksize, NULL);
-		configASSERT(status);
-		MemPool[idx].Handle = status;
-	}
+	// for(uint8_t idx=0; idx< (sizeof(MemPool)/sizeof(MemPool[0])); idx++)
+	// {
+	// 	osMemoryPoolId_t status = osMemoryPoolNew(MemPool[idx].Capacity, MemPool[idx].Blocksize, NULL);
+	// 	configASSERT(status);
+	// 	MemPool[idx].Handle = status;
+	// }
 	return true;
 }
 #endif /* MEMPOOL_H_ */

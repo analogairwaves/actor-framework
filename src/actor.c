@@ -1,6 +1,7 @@
 /******************************************************************************
 * Includes
 *******************************************************************************/
+#include "../osal/include/chip/osal.h"
 #include "actor.h" /* Free Active Object interface */
 
 /******************************************************************************
@@ -32,18 +33,18 @@ static void Active_eventLoop(void *pvParameters) {
 
 	for (;;) {   /* for-ever "superloop" */
 
-		EvtId_t e; /* pointer to event object ("message") */
+		// EvtId_t e; /* pointer to event object ("message") */
 
-		/* wait for any event and receive it into object 'e' */
+		// /* wait for any event and receive it into object 'e' */
 
-		osMessageQueueGet(me->equeue_handle, (void*)&e, NULL ,portWaitTimeout); /* BLOCKING! */
+		// osMessageQueueGet(me->equeue_handle, (void*)&e, NULL ,portWaitTimeout); /* BLOCKING! */
 
-		configASSERT(e);
+		// configASSERT(e);
 
-		/* dispatch event to the active object 'me' */
-		StateMachine_Dispatch(&me->sm, e);			/* NO BLOCKING! */
+		// /* dispatch event to the active object 'me' */
+		// StateMachine_Dispatch(&me->sm, e);			/* NO BLOCKING! */
 
-		Event_GC(e);
+		// Event_GC(e);
 
 	}
 }
@@ -54,6 +55,8 @@ static void Active_eventLoop(void *pvParameters) {
 *******************************************************************************/
 void Active_Init(Active *const				me,
 				 StateHandler				initial_statehandler,
+				 uint8_t 					priority,
+				 uint32_t 					stack_size,
 				 portTHREAD_ATTR_T const*	p_thread_attr,
 				 portEQUEUE_ATTR_T const*	p_equeue_attr,
 				 uint32_t					equeue_max_len)
@@ -63,16 +66,18 @@ void Active_Init(Active *const				me,
 	StateMachine_Init(&me->sm, initial_statehandler);
 
 	/* Initialize the Thread */
-	osThreadId_t thread_status = osThreadNew(&Active_eventLoop, me, p_thread_attr);
-    configASSERT(thread_status);
-	me->thread_handle = thread_status;
+	enum chip_os_error status = chip_os_task_init(&me->thread_handle,
+														"Actor",
+														&Active_eventLoop,
+														p_thread_attr,
+														priority,
+														stack_size);
+    configASSERT(status);
 	me->thread_param = p_thread_attr;
 
 	/* Initialize the Event queue */
-	osMessageQueueId_t equeue_status;
-	equeue_status = osMessageQueueNew(equeue_max_len, sizeof(EvtId_t), p_equeue_attr);
-    configASSERT(equeue_status);
-	me->equeue_handle = equeue_status;
+	status = chip_os_queue_init(&me->equeue_handle, sizeof(Evt *), equeue_max_len);
+    configASSERT(status);
 	me->equeue_param = p_equeue_attr;
 	Active_List[active_id++] = me;
 }
@@ -100,30 +105,30 @@ ActiveId_t Active_GetActiveByID(uint8_t id)
 bool Active_post(Active * const me, EvtId_t const e){
 
 	bool ret = false;
-	osStatus_t status;
-	for(uint8_t count=0; count < ACTOR_MAX_RETRY; count++)
-	{
-		status = osMessageQueuePut(me->equeue_handle, &e, 0, 0);
-		if (status == osOK)
-		{
-			if(e->xdata.is_dynamic != 0)
-			{
-				portDISABLE_INTERRUPTS();
-				e->xdata.ref_cnt++;
-				portENABLE_INTERRUPTS();
-			}
-			ret = true;
-			break;
-		}
-		else if (status == osErrorTimeout)
-		{
-			osDelay(50); /* Retry to put in case of full after 50 ticks */
-		}
-		else
-		{
-			configASSERT(0);
-		}
-	}
+	// enum chip_os_error status;
+	// for(uint8_t count=0; count < ACTOR_MAX_RETRY; count++)
+	// {
+	// 	status = osMessageQueuePut(me->equeue_handle, &e, 0, 0);
+	// 	if (status == CHIP_OS_OK)
+	// 	{
+	// 		if(e->xdata.is_dynamic != 0)
+	// 		{
+	// 			portDISABLE_INTERRUPTS();
+	// 			e->xdata.ref_cnt++;
+	// 			portENABLE_INTERRUPTS();
+	// 		}
+	// 		ret = true;
+	// 		break;
+	// 	}
+	// 	else if (status == CHIP_OS_TIMEOUT)
+	// 	{
+	// 		osDelay(50); /* Retry to put in case of full after 50 ticks */
+	// 	}
+	// 	else
+	// 	{
+	// 		configASSERT(0);
+	// 	}
+	// }
 	return ret;
 }
 

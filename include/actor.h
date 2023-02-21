@@ -4,13 +4,14 @@
 /******************************************************************************
 * Includes
 *******************************************************************************/
-#include "cmsis_os.h"
-#include "queue.h"
+// #include "cmsis_os.h"
+// #include "queue.h"
 #include "state_machine.h"
 #include "mempool.h"
 #include "event.h"
 
-
+#include "chip/osal.h"
+#include "chip/os_port.h"
 /******************************************************************************
 * Preprocessor Constants
 *******************************************************************************/
@@ -20,6 +21,7 @@
 /******************************************************************************
 * Configuration Constants
 *******************************************************************************/
+#ifdef CMSIS_RTOS2
 /* CMSIS RTOS v2 */
 #define	portTHREAD_ATTR_T			osThreadAttr_t
 #define	portTHREAD_HANDLE_T			osThreadId_t
@@ -28,6 +30,21 @@
 #define	portEQUEUE_HANDLE_T			osMessageQueueId_t
 
 #define portWaitTimeout				osWaitForever
+
+#else
+
+typedef struct chip_os_task os_task_t;
+
+#define	portTHREAD_ATTR_T			void *
+#define	portTHREAD_HANDLE_T			os_task_t
+
+#define	portEQUEUE_ATTR_T			void *
+#define	portEQUEUE_HANDLE_T			struct chip_os_queue
+
+#define portWaitTimeout				CHIP_OS_TIME_FOREVER
+
+#endif /* End ofdef CMSIS_RTOS2 */
+
 /******************************************************************************
 * Macros
 *******************************************************************************/
@@ -63,6 +80,8 @@ struct Active {
 *******************************************************************************/
 void Active_Init(Active *const				me,
 				 StateHandler				initial_statehandler,
+				 uint8_t 					priority,
+				 uint32_t 					stack_size,
 				 portTHREAD_ATTR_T const*	p_thread_attr,
 				 portEQUEUE_ATTR_T const*	p_equeue_attr,
 				 uint32_t					equeue_max_len);
