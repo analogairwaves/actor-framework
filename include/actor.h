@@ -33,13 +33,15 @@
 
 #else
 
-typedef struct chip_os_task os_task_t;
+typedef struct chip_os_task 	os_task_t;
+typedef struct chip_os_queue	os_queue_t;
+typedef enum chip_os_err		os_err_code;
 
 #define	portTHREAD_ATTR_T			void *
 #define	portTHREAD_HANDLE_T			os_task_t
 
 #define	portEQUEUE_ATTR_T			void *
-#define	portEQUEUE_HANDLE_T			struct chip_os_queue
+#define	portEQUEUE_HANDLE_T			os_queue_t
 
 #define portWaitTimeout				CHIP_OS_TIME_FOREVER
 
@@ -91,7 +93,7 @@ void Active_Init(Active *const				me,
  * @param: 	e:		Pointer to event to post
  * @return: true if posted successfully */
 
-bool Active_post(Active * const me, EvtId_t const e);
+bool Active_post(Active * const me, EvtHandle_t const e);
 uint8_t Active_GetID(Active* const me);
 ActiveId_t Active_GetActiveByID(uint8_t id);
 #endif /* ACTOR_H */

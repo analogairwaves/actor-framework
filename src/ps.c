@@ -31,7 +31,7 @@ static Subscribers_t Subscribers_List[SIG_MAX]={0};
 /******************************************************************************
 * Function Definitions
 *******************************************************************************/
-void Subscribe(ActiveId_t const actor, EvtId_t e)
+void Subscribe(ActiveId_t const actor, EvtHandle_t e)
 {
 	// uint8_t idx = Active_GetID(actor);
 	// configASSERT(idx < ACTOR_MAX_NUMB)
@@ -40,7 +40,7 @@ void Subscribe(ActiveId_t const actor, EvtId_t e)
 	// Subscribers_List[e->sig].bits |= (1 << idx);
 }
 
-void UnSubscribe(ActiveId_t const actor, EvtId_t e)
+void UnSubscribe(ActiveId_t const actor, EvtHandle_t e)
 {
 	// uint8_t idx = Active_GetID(actor);
 	// configASSERT(idx < ACTOR_MAX_NUMB)
@@ -58,7 +58,7 @@ void UnSubscribeAll(ActiveId_t const actor)
 	// }
 }
 
-void Publish(EvtId_t e)
+void Publish(EvtHandle_t e)
 {
 	// portDISABLE_INTERRUPTS();
 

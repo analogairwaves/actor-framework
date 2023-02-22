@@ -3,7 +3,6 @@
 *******************************************************************************/
 #include "../osal/include/chip/osal.h"
 #include "actor.h" /* Free Active Object interface */
-
 /******************************************************************************
 * Module Preprocessor Constants
 *******************************************************************************/
@@ -22,6 +21,8 @@
 static ActiveId_t Active_List[ACTOR_MAX_NUMB]={0};
 
 
+
+
 /******************************************************************************
 * Private Functions
 *******************************************************************************/
@@ -33,18 +34,18 @@ static void Active_eventLoop(void *pvParameters) {
 
 	for (;;) {   /* for-ever "superloop" */
 
-		// EvtId_t e; /* pointer to event object ("message") */
+		Evt e = {0};  
 
-		// /* wait for any event and receive it into object 'e' */
+		/* wait for any event and receive it into object 'e' */
+		chip_os_error_t status = chip_os_queue_get(&me->equeue_handle, &e, CHIP_OS_TIME_FOREVER);
+		if(CHIP_OS_OK == status)
+		{
 
-		// osMessageQueueGet(me->equeue_handle, (void*)&e, NULL ,portWaitTimeout); /* BLOCKING! */
+			/* dispatch event to the active object 'me' */
+			StateMachine_Dispatch(&me->sm, &e);			/* NO BLOCKING! */
 
-		// configASSERT(e);
-
-		// /* dispatch event to the active object 'me' */
-		// StateMachine_Dispatch(&me->sm, e);			/* NO BLOCKING! */
-
-		// Event_GC(e);
+			Event_GC(&e);
+		}
 
 	}
 }
@@ -66,18 +67,18 @@ void Active_Init(Active *const				me,
 	StateMachine_Init(&me->sm, initial_statehandler);
 
 	/* Initialize the Thread */
-	enum chip_os_error status = chip_os_task_init(&me->thread_handle,
-														"Actor",
-														&Active_eventLoop,
-														p_thread_attr,
-														priority,
-														stack_size);
-    configASSERT(status);
+	chip_os_error_t status = chip_os_task_init(&me->thread_handle,
+												"Actor",
+												&Active_eventLoop,
+												me,
+												priority,
+												stack_size);
+    configASSERT(CHIP_OS_OK == status);
 	me->thread_param = p_thread_attr;
 
 	/* Initialize the Event queue */
 	status = chip_os_queue_init(&me->equeue_handle, sizeof(Evt *), equeue_max_len);
-    configASSERT(status);
+    configASSERT(CHIP_OS_OK == status);
 	me->equeue_param = p_equeue_attr;
 	Active_List[active_id++] = me;
 }
@@ -102,33 +103,33 @@ ActiveId_t Active_GetActiveByID(uint8_t id)
 }
 
 /*..........................................................................*/
-bool Active_post(Active * const me, EvtId_t const e){
+bool Active_post(Active * const me, EvtHandle_t const e){
 
 	bool ret = false;
-	// enum chip_os_error status;
-	// for(uint8_t count=0; count < ACTOR_MAX_RETRY; count++)
-	// {
-	// 	status = osMessageQueuePut(me->equeue_handle, &e, 0, 0);
-	// 	if (status == CHIP_OS_OK)
-	// 	{
-	// 		if(e->xdata.is_dynamic != 0)
-	// 		{
-	// 			portDISABLE_INTERRUPTS();
-	// 			e->xdata.ref_cnt++;
-	// 			portENABLE_INTERRUPTS();
-	// 		}
-	// 		ret = true;
-	// 		break;
-	// 	}
-	// 	else if (status == CHIP_OS_TIMEOUT)
-	// 	{
-	// 		osDelay(50); /* Retry to put in case of full after 50 ticks */
-	// 	}
-	// 	else
-	// 	{
-	// 		configASSERT(0);
-	// 	}
-	// }
+	chip_os_error_t status;
+	for(uint8_t count=0; count < ACTOR_MAX_RETRY; count++)
+	{
+#ifndef CMSIS_RTOS2
+		status = chip_os_queue_put(&me->equeue_handle, e);
+#else
+		status = osMessageQueuePut(me->equeue_handle, &e, 0, 0);
+#endif /* not defined CMSIS_RTOS2 */
+		if (status == CHIP_OS_OK)
+		{
+			if(e->xdata.is_dynamic != 0)
+			{
+				portDISABLE_INTERRUPTS();
+				e->xdata.ref_cnt++;
+				portENABLE_INTERRUPTS();
+			}
+			ret = true;
+			break;
+		}
+		else
+		{
+			configASSERT(0);
+		}
+	}
 	return ret;
 }
 

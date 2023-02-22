@@ -31,16 +31,16 @@
 *******************************************************************************/
 
 /* Return the address of allocated memory */
-EvtId_t Event_New(eSignal sig, uint16_t evt_size)
+EvtHandle_t Event_New(eSignal sig, uint16_t evt_size)
 {
-	EvtId_t e = NULL;
+	EvtHandle_t e = NULL;
 	// uint8_t idx;
 	// for(idx=0; idx < POOL_NUMB_SIZE; idx++)
 	// {
 	// 	if(evt_size <= (Mempool_P+idx)->Blocksize)
 	// 	{
 	// 		e = osMemoryPoolAlloc((Mempool_P+idx)->Handle, portWaitTimeout);
-	// 		if(e != (EvtId_t) NULL)
+	// 		if(e != (EvtHandle_t) NULL)
 	// 		{
 	// 			e->sig = sig;
 	// 			e->xdata.is_dynamic = (idx+1);
@@ -54,7 +54,7 @@ EvtId_t Event_New(eSignal sig, uint16_t evt_size)
 }
 
 /* Event garbage collector */
-void Event_GC(EvtId_t e)
+void Event_GC(EvtHandle_t p_e)
 {
 	// if (e->xdata.is_dynamic != 0)
 	// {

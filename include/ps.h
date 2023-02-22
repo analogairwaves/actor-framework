@@ -34,9 +34,9 @@
 /******************************************************************************
 * Function Prototypes
 *******************************************************************************/
-void Subscribe(ActiveId_t const actor, EvtId_t e);
-void UnSubscribe(ActiveId_t const actor, EvtId_t e);
+void Subscribe(ActiveId_t const actor, EvtHandle_t e);
+void UnSubscribe(ActiveId_t const actor, EvtHandle_t e);
 void UnSubscribeAll(ActiveId_t const actor);
-void Publish(EvtId_t e);
+void Publish(EvtHandle_t e);
 
 #endif /* PS_H_ */

@@ -17,7 +17,7 @@ void StateMachine_Init(StateMachine_t* const me, StateHandler initial_statehandl
 	(*me->statehandler)(me, &Init_event);	
 }
 
-void StateMachine_Dispatch(StateMachine_t* const me, EvtId_t const p_event)
+void StateMachine_Dispatch(StateMachine_t* const me, EvtHandle_t const p_event)
 {
 	StateHandler prev_statehandler = me->statehandler; //Back up previous state-handler
 	eStatus status = (*me->statehandler)(me, p_event);
