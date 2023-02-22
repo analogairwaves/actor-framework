@@ -3,6 +3,7 @@
 *******************************************************************************/
 #include "../osal/include/chip/osal.h"
 #include "actor.h" /* Free Active Object interface */
+#include "mempool.h"
 /******************************************************************************
 * Module Preprocessor Constants
 *******************************************************************************/
@@ -131,5 +132,10 @@ bool Active_post(Active * const me, EvtHandle_t const e){
 		}
 	}
 	return ret;
+}
+
+uint8_t Framework_Init()
+{
+	return Mempool_Init();
 }
 

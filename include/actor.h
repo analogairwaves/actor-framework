@@ -7,7 +7,6 @@
 // #include "cmsis_os.h"
 // #include "queue.h"
 #include "state_machine.h"
-#include "mempool.h"
 #include "event.h"
 
 #include "chip/osal.h"
@@ -96,4 +95,5 @@ void Active_Init(Active *const				me,
 bool Active_post(Active * const me, EvtHandle_t const e);
 uint8_t Active_GetID(Active* const me);
 ActiveId_t Active_GetActiveByID(uint8_t id);
+uint8_t Framework_Init();
 #endif /* ACTOR_H */

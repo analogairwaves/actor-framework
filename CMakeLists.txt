@@ -8,7 +8,7 @@ message(" ========== Entering ${CMAKE_CURRENT_LIST_DIR}/CMakelists.txt==========
 
 idf_component_register(SRC_DIRS "./src"
                      INCLUDE_DIRS "./include"
-                     REQUIRES osal)
+                     REQUIRES osal lwmem)
 
 if(TEST) # Not working yet
 
@@ -47,6 +47,10 @@ target_link_libraries(LibActor} PUBLIC osal_lib)
 # target_link_libraries(main PUBLIC LibActor})
 endif(TEST)
 
+# Can't link with OSAL lib
+# add_subdirectory(./3rd-party/lwmem/lwmem)
+# message("==========${COMPONENT_LIB}==========")
+# target_link_libraries(${COMPONENT_LIB} lwmem)
 message(" ========== Exitting ${CMAKE_CURRENT_LIST_DIR}/CMakelists.txt ========== ")
 
 

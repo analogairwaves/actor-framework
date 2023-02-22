@@ -30,8 +30,8 @@ typedef Evt* EvtHandle_t;
 
 typedef struct
 {
-	uint8_t ref_cnt     : 6;
-    uint8_t is_dynamic  : 2;
+	uint8_t ref_cnt     : 6; /* Allow multicast and only delete when gabage collector with value 0 */
+    uint8_t is_dynamic  : 2; /* 0-> Static, >0 dynamic and the value is the pool with idx -1 (example, dynamic = 1-> pool 0) */
 }Evt_extra;
 
 typedef enum {

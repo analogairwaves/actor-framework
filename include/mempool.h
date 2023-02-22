@@ -2,22 +2,20 @@
 #ifndef MEMPOOL_H_
 #define MEMPOOL_H_
 
+#include <stdbool.h>
+#if (CMSIS_RTOS2 == 1)
+#else
+#include "lwmem/lwmem.h"
+#endif /* End of (CMSIS_RTOS2 == 1) */
+
 /******************************************************************************
 * Includes
 *******************************************************************************/
-#include "actor.h"
+
 /******************************************************************************
 * Configuration Constants
 *******************************************************************************/
-#define POOL_SMALL_SIZE						50
-#define POOL_MEDIUM_SIZE					20
-#define POOL_BIG_SIZE						10
 
-#define POOL_SMALL_BLOCKSIZE				10
-#define POOL_MEDIUM_BLOCKSIZE				20
-#define POOL_BIG_BLOCKSIZE					50
-
-#define POOL_NUMB_SIZE						3	/* SMALL, MEDIUM, BIG */
 
 /******************************************************************************
 * Macros
@@ -28,17 +26,24 @@
 /******************************************************************************
 * Typedefs
 *******************************************************************************/
+#if (CMSIS_RTOS2 == 1)
+
 typedef struct
 {
-	uint8_t * Handle;
+	osMemoryPoolId_t* Handle;
 	int16_t Capacity;
 	int16_t Blocksize;
 }MPool_t;
+extern MPool_t* Mempool_P;
+
+#else
+
+#endif /* End of (CMSIS_RTOS2 == 1) */
+
 
 /******************************************************************************
 * Variables
 *******************************************************************************/
-extern MPool_t* Mempool_P;
 
 /******************************************************************************
 * Function Prototypes
