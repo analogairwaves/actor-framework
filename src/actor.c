@@ -67,8 +67,13 @@ void Active_Init(Active *const				me,
     configASSERT(me); /* Active object must be provided */
 	StateMachine_Init(&me->sm, initial_statehandler);
 
+	/* Initialize the Event queue */
+	chip_os_error_t status = chip_os_queue_init(&me->equeue_handle, sizeof(Evt *), equeue_max_len);
+    configASSERT(CHIP_OS_OK == status);
+	me->equeue_param = p_equeue_attr;
+
 	/* Initialize the Thread */
-	chip_os_error_t status = chip_os_task_init(&me->thread_handle,
+	 status = chip_os_task_init(&me->thread_handle,
 												"Actor",
 												&Active_eventLoop,
 												me,
@@ -77,10 +82,7 @@ void Active_Init(Active *const				me,
     configASSERT(CHIP_OS_OK == status);
 	me->thread_param = p_thread_attr;
 
-	/* Initialize the Event queue */
-	status = chip_os_queue_init(&me->equeue_handle, sizeof(Evt *), equeue_max_len);
-    configASSERT(CHIP_OS_OK == status);
-	me->equeue_param = p_equeue_attr;
+
 	Active_List[active_id++] = me;
 }
 
