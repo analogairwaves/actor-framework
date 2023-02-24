@@ -35,17 +35,17 @@ static void Active_eventLoop(void *pvParameters) {
 
 	for (;;) {   /* for-ever "superloop" */
 
-		Evt e = {0};  
+		EvtHandle_t p_e = NULL; /* Contain the memory addr of allocated evt */
 
 		/* wait for any event and receive it into object 'e' */
-		chip_os_error_t status = chip_os_queue_get(&me->equeue_handle, &e, CHIP_OS_TIME_FOREVER);
+		chip_os_error_t status = chip_os_queue_get(&me->equeue_handle, &p_e, CHIP_OS_TIME_FOREVER);
 		if(CHIP_OS_OK == status)
 		{
-
+			configASSERT(p_e);
 			/* dispatch event to the active object 'me' */
-			StateMachine_Dispatch(&me->sm, &e);			/* NO BLOCKING! */
+			StateMachine_Dispatch(&me->sm, p_e);			/* NO BLOCKING! */
 
-			Event_GC(&e);
+			Event_GC(p_e);
 		}
 
 	}
@@ -73,12 +73,12 @@ void Active_Init(Active *const				me,
 	me->equeue_param = p_equeue_attr;
 
 	/* Initialize the Thread */
-	 status = chip_os_task_init(&me->thread_handle,
-												"Actor",
-												&Active_eventLoop,
-												me,
-												priority,
-												stack_size);
+	status = chip_os_task_init(&me->thread_handle,
+								"Actor",
+								&Active_eventLoop,
+								me,
+								priority,
+								stack_size);
     configASSERT(CHIP_OS_OK == status);
 	me->thread_param = p_thread_attr;
 
@@ -113,7 +113,7 @@ bool Active_post(Active * const me, EvtHandle_t const e){
 	for(uint8_t count=0; count < ACTOR_MAX_RETRY; count++)
 	{
 #ifndef CMSIS_RTOS2
-		status = chip_os_queue_put(&me->equeue_handle, e);
+		status = chip_os_queue_put(&me->equeue_handle, &e); /* Addr of memory location that contains addr of the event */
 #else
 		status = osMessageQueuePut(me->equeue_handle, &e, 0, 0);
 #endif /* not defined CMSIS_RTOS2 */
@@ -122,7 +122,7 @@ bool Active_post(Active * const me, EvtHandle_t const e){
 			if(e->xdata.is_dynamic != 0)
 			{
 				portDISABLE_INTERRUPTS();
-				e->xdata.ref_cnt++;
+				e->xdata.ref_cnt = (e->xdata.ref_cnt + 1) % (1<<6); /* Ref counter only has 6-bit value */
 				portENABLE_INTERRUPTS();
 			}
 			ret = true;

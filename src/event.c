@@ -58,7 +58,7 @@ EvtHandle_t Event_New(eSignal sig, uint16_t evt_size)
 		}
 	}
 	#else
-	p_e = lwmem_malloc(evt_size);
+	p_e = lwmem_malloc(evt_size); //p_e hold the mem addr to store event struct
 	configASSERT(p_e); //FIXME: Cant alloc new event
 	if(p_e != (EvtHandle_t) NULL)
 	{
@@ -77,7 +77,12 @@ void Event_GC(EvtHandle_t p_e)
 	{
 		portDISABLE_INTERRUPTS();
 		/* The last one use this event ?*/
-		if(p_e->xdata.ref_cnt == 0)
+		if(p_e->xdata.ref_cnt > 1)
+		{
+			p_e->xdata.ref_cnt--;
+			portENABLE_INTERRUPTS();
+		}
+		else
 		{
 			portENABLE_INTERRUPTS();
 			#if (CMSIS_RTOS2 == 1)
@@ -88,11 +93,6 @@ void Event_GC(EvtHandle_t p_e)
 			#else
 			lwmem_free(p_e);
 			#endif /* End of (CMSIS_RTOS2 == 1) */
-		}
-		else
-		{
-			p_e->xdata.ref_cnt--;
-			portENABLE_INTERRUPTS();
 		}
 	}
 }

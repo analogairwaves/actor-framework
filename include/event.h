@@ -41,14 +41,6 @@ typedef enum {
 	USER_SIG,
 }ReservedSignals;
 
-enum Signal
-{
-	/* BLE signals */
-	SIG_IDLE = USER_SIG,
-	/* .... */
-	SIG_MAX
-};
-
 struct Event_t
 {
 	eSignal     sig;			/* Inheritance */
