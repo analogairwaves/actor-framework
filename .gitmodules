@@ -3,4 +3,4 @@
 	url = ../osal.git
 [submodule "3rd-party/lwmem"]
 	path = 3rd-party/lwmem
-	url = https://github.com/thuan1091996/lwmem.git
+	url = ../lwmem.git

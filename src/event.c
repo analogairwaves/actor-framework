@@ -59,6 +59,7 @@ EvtHandle_t Event_New(eSignal sig, uint16_t evt_size)
 	}
 	#else
 	p_e = lwmem_malloc(evt_size);
+	configASSERT(p_e); //FIXME: Cant alloc new event
 	if(p_e != (EvtHandle_t) NULL)
 	{
 		p_e->sig = sig;
@@ -66,7 +67,6 @@ EvtHandle_t Event_New(eSignal sig, uint16_t evt_size)
 		p_e->xdata.ref_cnt = 0;
 	}
 	#endif /* End of (CMSIS_RTOS2 == 1) */
-	configASSERT(p_e); //FIXME: Cant alloc new event
 	return p_e;
 }
 
